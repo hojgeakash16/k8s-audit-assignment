@@ -1,0 +1,17 @@
+# localtest.me resolves to 127.0.0.1, so no /etc/hosts edit is needed.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: voting-app
+  namespace: vote
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: vote.localtest.me
+      http:
+        paths:
+          - {path: /, pathType: Prefix, backend: {service: {name: vote, port: {number: 80}}}}
+    - host: result.localtest.me
+      http:
+        paths:
+          - {path: /, pathType: Prefix, backend: {service: {name: result, port: {number: 80}}}}

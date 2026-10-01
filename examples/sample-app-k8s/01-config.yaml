@@ -1,0 +1,18 @@
+# Non-secret settings go in the ConfigMap, the DB password goes in the Secret.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vote-config
+  namespace: vote
+data:
+  OPTION_A: "Kubernetes"
+  OPTION_B: "Docker Swarm"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: db-credentials
+  namespace: vote
+type: Opaque
+stringData:
+  POSTGRES_PASSWORD: change-me-please

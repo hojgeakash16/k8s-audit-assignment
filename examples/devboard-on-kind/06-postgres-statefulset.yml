@@ -1,0 +1,87 @@
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: postgres
+  namespace: devboard-ns
+  labels:
+    app: devboard-postgres
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: devboard-postgres
+  serviceName: postgres
+  template:
+    metadata:
+      labels:
+        app: devboard-postgres
+
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:16-alpine
+        ports:
+        - containerPort: 5432
+          name: web
+        volumeMounts:
+        - name: pgdata
+          mountPath: /var/lib/postgresql/data
+        - name: init
+          mountPath: /docker-entrypoint-initdb.d
+        env:
+          # Kept from the EKS file. local-path has no lost+found, but a
+          # subdirectory is harmless and makes the file work on both.
+          - name: PGDATA
+            value: /var/lib/postgresql/data/pgdata
+
+          - name: POSTGRES_USER
+            valueFrom:
+              configMapKeyRef:
+                name: devboard-configmap
+                key: POSTGRES_USER
+
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: devboard-secrets
+                key: POSTGRES_PASSWORD
+
+          - name: POSTGRES_DB
+            valueFrom:
+              configMapKeyRef:
+                name: devboard-configmap
+                key: POSTGRES_DB
+        readinessProbe:
+          exec:
+            command:
+              - /bin/sh
+              - -c
+              - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+        livenessProbe:
+          exec:
+            command:
+              - /bin/sh
+              - -c
+              - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+      volumes:
+        - name: init
+          configMap:
+            name: postgres-init
+  volumeClaimTemplates:
+  - metadata:
+      name: pgdata
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 0.5Gi

@@ -1,0 +1,115 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vote
+  namespace: vote
+  labels: {app: vote, tier: frontend, app.kubernetes.io/part-of: voting-app}
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: {maxSurge: 1, maxUnavailable: 0}
+  selector:
+    matchLabels: {app: vote}
+  template:
+    metadata:
+      labels: {app: vote, tier: frontend}
+    spec:
+      serviceAccountName: vote-app
+      automountServiceAccountToken: false
+      containers:
+        - name: vote
+          image: vote:1.0
+          imagePullPolicy: IfNotPresent
+          ports: [{containerPort: 80}]
+          envFrom:
+            - configMapRef: {name: vote-config}
+          readinessProbe:
+            httpGet: {path: /, port: 80}
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: {path: /, port: 80}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests: {cpu: 50m, memory: 64Mi}
+            limits: {cpu: 250m, memory: 192Mi}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vote
+  namespace: vote
+spec:
+  selector: {app: vote}
+  ports: [{port: 80, targetPort: 80}]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: result
+  namespace: vote
+  labels: {app: result, tier: frontend, app.kubernetes.io/part-of: voting-app}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: result}
+  template:
+    metadata:
+      labels: {app: result, tier: frontend}
+    spec:
+      containers:
+        - name: result
+          image: result:1.0
+          imagePullPolicy: IfNotPresent
+          ports: [{containerPort: 80}]
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: db-credentials, key: POSTGRES_PASSWORD}
+          readinessProbe:
+            httpGet: {path: /, port: 80}
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: {path: /, port: 80}
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests: {cpu: 50m, memory: 64Mi}
+            limits: {cpu: 250m, memory: 192Mi}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: result
+  namespace: vote
+spec:
+  selector: {app: result}
+  ports: [{port: 80, targetPort: 80}]
+---
+# The worker has no port, so no Service and no HTTP probe. It just reads redis and writes to Postgres.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+  namespace: vote
+  labels: {app: worker, tier: backend, app.kubernetes.io/part-of: voting-app}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: worker}
+  template:
+    metadata:
+      labels: {app: worker, tier: backend}
+    spec:
+      containers:
+        - name: worker
+          image: worker:1.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: db-credentials, key: POSTGRES_PASSWORD}
+          resources:
+            requests: {cpu: 50m, memory: 64Mi}
+            limits: {cpu: 250m, memory: 192Mi}

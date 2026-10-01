@@ -1,0 +1,31 @@
+# Plain Docker starting point. Not kubernetized on purpose.
+#   docker compose up --build
+#   vote:   http://localhost:8081
+#   result: http://localhost:8082
+services:
+  vote:
+    build: ./vote
+    ports: ["8081:80"]
+    depends_on: [redis]
+  result:
+    build: ./result
+    ports: ["8082:80"]
+    environment:
+      POSTGRES_PASSWORD: postgres
+    depends_on: [db]
+  worker:
+    build: ./worker
+    environment:
+      POSTGRES_PASSWORD: postgres
+    depends_on: [redis, db]
+  redis:
+    image: redis:alpine
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - db-data:/var/lib/postgresql/data
+volumes:
+  db-data:

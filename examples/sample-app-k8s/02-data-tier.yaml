@@ -1,0 +1,100 @@
+# Redis: queue only, so no volume. Postgres: votes must survive a pod restart, so it gets a PVC.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: db-data
+  namespace: vote
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db
+  namespace: vote
+  labels: {app: db, tier: data, app.kubernetes.io/part-of: voting-app}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate        # RWO volume: the old pod must stop before the new one starts
+  selector:
+    matchLabels: {app: db}
+  template:
+    metadata:
+      labels: {app: db, tier: data}
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15-alpine
+          ports: [{containerPort: 5432}]
+          env:
+            - {name: POSTGRES_USER, value: postgres}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: db-credentials, key: POSTGRES_PASSWORD}
+            - {name: PGDATA, value: /var/lib/postgresql/data/pgdata}
+          volumeMounts:
+            - {name: data, mountPath: /var/lib/postgresql/data}
+          readinessProbe:
+            exec: {command: [pg_isready, -U, postgres]}
+            periodSeconds: 5
+          livenessProbe:
+            exec: {command: [pg_isready, -U, postgres]}
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          resources:
+            requests: {cpu: 100m, memory: 128Mi}
+            limits: {cpu: 500m, memory: 256Mi}
+      volumes:
+        - name: data
+          persistentVolumeClaim: {claimName: db-data}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db            # the app code connects to the host "db"
+  namespace: vote
+spec:
+  selector: {app: db}
+  ports: [{port: 5432, targetPort: 5432}]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: vote
+  labels: {app: redis, tier: data, app.kubernetes.io/part-of: voting-app}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: redis}
+  template:
+    metadata:
+      labels: {app: redis, tier: data}
+    spec:
+      containers:
+        - name: redis
+          image: redis:alpine
+          ports: [{containerPort: 6379}]
+          readinessProbe:
+            tcpSocket: {port: 6379}
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket: {port: 6379}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests: {cpu: 50m, memory: 32Mi}
+            limits: {cpu: 200m, memory: 64Mi}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis         # the app code connects to the host "redis"
+  namespace: vote
+spec:
+  selector: {app: redis}
+  ports: [{port: 6379, targetPort: 6379}]

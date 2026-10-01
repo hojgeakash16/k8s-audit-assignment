@@ -1,0 +1,24 @@
+# vote-app: identity for the vote pods, with no API token mounted (the app never calls the API).
+# viewer: a read-only identity for a teammate or a CI job that only needs to look at pods and logs.
+apiVersion: v1
+kind: ServiceAccount
+metadata: {name: vote-app, namespace: vote}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata: {name: viewer, namespace: vote}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata: {name: pod-reader, namespace: vote}
+rules:
+  - apiGroups: [""]
+    resources: [pods, pods/log]
+    verbs: [get, list, watch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata: {name: viewer-pod-reader, namespace: vote}
+subjects:
+  - {kind: ServiceAccount, name: viewer, namespace: vote}
+roleRef: {apiGroup: rbac.authorization.k8s.io, kind: Role, name: pod-reader}

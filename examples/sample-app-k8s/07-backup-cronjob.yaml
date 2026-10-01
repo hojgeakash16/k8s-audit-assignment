@@ -1,0 +1,38 @@
+# Nightly pg_dump into its own PVC. Run it now with:
+#   kubectl -n vote create job --from=cronjob/db-backup db-backup-manual
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: {name: db-backups, namespace: vote}
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests: {storage: 1Gi}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata: {name: db-backup, namespace: vote}
+spec:
+  schedule: "0 2 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: pg-dump
+              image: postgres:15-alpine
+              command: [sh, -c, 'pg_dump -h db -U postgres postgres > /backups/votes-$(date +%Y%m%d-%H%M%S).sql && ls -l /backups']
+              env:
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef: {name: db-credentials, key: POSTGRES_PASSWORD}
+              volumeMounts:
+                - {name: backups, mountPath: /backups}
+              resources:
+                requests: {cpu: 50m, memory: 64Mi}
+                limits: {cpu: 250m, memory: 128Mi}
+          volumes:
+            - name: backups
+              persistentVolumeClaim: {claimName: db-backups}
