@@ -4,12 +4,49 @@ Fill this in after you run `./audit.sh`. The script is only a hint. Your evidenc
 
 ## My app
 
-- Name:
-- Repo link:
+- Name: Sample Voting App
+
+- Repo link: https://github.com/hojgeakash16/k8s-audit-assignment.git
+
 - Tiers (frontend / API / database or cache, and what each one is built with):
-- Kubernetes manifests are in (folder):
+  - Vote: Python Flask application served by Gunicorn.
+  - Result: Node.js / Express application.
+  - Worker: .NET background worker.
+  - Redis: Redis cache/queue.
+  - PostgreSQL: PostgreSQL 15 database.
+
+- Kubernetes manifests are in (folder): 'sample-app/kubernetes/'
+
 - How to run it from a fresh machine (every command, in order, starting from `kind create cluster`):
+  kind create cluster --name audit --config kind/kind-config.yaml
+
+kubectl get nodes
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.13.2/deploy/static/provider/kind/deploy.yaml
+
+cd sample-app/vote
+docker build -t vote:1.0 .
+
+cd ../result
+docker build -t result:1.0 .
+
+cd ../worker
+docker build -t sample-worker:1.0 .
+
+kind load docker-image vote:1.0 --name audit
+kind load docker-image result:1.0 --name audit
+kind load docker-image sample-worker:1.0 --name audit
+
+cd ../kubernetes
+kubectl apply -f .
+
+kubectl get pods -n sample-app-ns
+kubectl get services -n sample-app-ns
+kubectl get ingress -n sample-app-ns
+
 - How to open it (URL, or port-forward command):
+  curl -I -H "Host: vote.local" http://localhost/
+  curl -I -H "Host: result.local" http://localhost/
 
 ## Before you submit
 
