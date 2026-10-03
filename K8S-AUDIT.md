@@ -67,8 +67,8 @@ kubectl get ingress -n sample-app-ns
 
 | Concept | Status (✅ / ⚠️ / ❌) | Evidence | Why I used it in my app | Where to look |
 |---|---|---|---|---|
-| Deployment + ReplicaSet | ✅ | kubectl get deployments -n sample-app-ns` shows 5 Deployments. Each Deployment manages a ReplicaSet and maintains the desired number of Pods | Deployments keep the application components running and provide replica management and rolling updates. | sample-app/kubernetes/ |
-| Service | | | | [nginx Service](https://github.com/LondheShubham153/kubestarter/blob/main/examples/nginx/service.yml) <!-- TODO: add video timestamp --> |
+| Deployment + ReplicaSet | ✅ | kubectl get deployments -n sample-app-ns shows 5 Deployments. Each Deployment manages a ReplicaSet and maintains the desired number of Pods | Deployments keep the application components running and provide replica management and rolling updates. | sample-app/kubernetes/ |
+| Service | ✅ | kubectl get svc -n sample-app-ns shows 4 Services: vote, result, redis, and db | Services provide stable networking and DNS names between application components. | sample-app/kubernetes/ |
 | Namespace | | | | [namespace manifest](https://github.com/LondheShubham153/kubernetes-in-one-shot/blob/master/nginx/namespace.yml), [k8s docs](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/) <!-- TODO: add video timestamp --> |
 | Labels and selectors | | | | [commands: namespaces, labels, selectors](https://github.com/LondheShubham153/kubernetes-in-one-shot/blob/master/README.md), [k8s docs](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/) <!-- TODO: add video timestamp --> |
 | Rolling update + rollback | | | | [rolling update](https://github.com/LondheShubham153/kubestarter/blob/main/Deployment_Strategies/Rolling-Update-Deployment/) (rollback is not covered there, see [k8s docs](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)) <!-- TODO: add video timestamp --> |
