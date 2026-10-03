@@ -67,7 +67,7 @@ kubectl get ingress -n sample-app-ns
 
 | Concept | Status (✅ / ⚠️ / ❌) | Evidence | Why I used it in my app | Where to look |
 |---|---|---|---|---|
-| Deployment + ReplicaSet | ✅ | kubectl get deployments -n sample-app-ns` shows 5 Deployments. Each Deployment manages a ReplicaSet and maintains the desired number of Pods | Deployments keep the application components running and provide replica management and rolling updates. |  | `sample-app/kubernetes/` |<!-- TODO: add video timestamp --> |
+| Deployment + ReplicaSet | ✅ | kubectl get deployments -n sample-app-ns` shows 5 Deployments. Each Deployment manages a ReplicaSet and maintains the desired number of Pods | Deployments keep the application components running and provide replica management and rolling updates. |  | sample-app/kubernetes/ |
 | Service | | | | [nginx Service](https://github.com/LondheShubham153/kubestarter/blob/main/examples/nginx/service.yml) <!-- TODO: add video timestamp --> |
 | Namespace | | | | [namespace manifest](https://github.com/LondheShubham153/kubernetes-in-one-shot/blob/master/nginx/namespace.yml), [k8s docs](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/) <!-- TODO: add video timestamp --> |
 | Labels and selectors | | | | [commands: namespaces, labels, selectors](https://github.com/LondheShubham153/kubernetes-in-one-shot/blob/master/README.md), [k8s docs](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/) <!-- TODO: add video timestamp --> |
