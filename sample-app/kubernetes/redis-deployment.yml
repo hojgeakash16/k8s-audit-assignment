@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-deployment
+  namespace: sample-app-ns
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: sample-app
+      component: redis
+
+  template:
+    metadata:
+      labels:
+        app: sample-app
+        component: redis
+
+    spec:
+      containers:
+        - name: redis
+          image: redis:alpine
+
+          ports:
+            - containerPort: 6379
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
+
+          readinessProbe:
+            exec:
+              command:
+                - redis-cli 
+                - ping
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          livenessProbe:
+            exec:
+              command:
+                - redis-cli
+                - ping
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3

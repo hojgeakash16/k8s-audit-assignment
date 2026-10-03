@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: result
+  namespace: sample-app-ns
+spec:
+  selector:
+    app: sample-app
+    component: result
+  ports:
+    - port: 80
+      targetPort: 80

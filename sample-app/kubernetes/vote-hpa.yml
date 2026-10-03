@@ -1,0 +1,21 @@
+kind: HorizontalPodAutoscaler
+apiVersion: autoscaling/v2
+metadata:
+  name: vote-hpa
+  namespace: sample-app-ns
+spec:
+  scaleTargetRef:
+       kind: Deployment
+       apiVersion: apps/v1
+       name: vote-deployment
+
+  minReplicas: 2
+  maxReplicas: 5
+
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50  

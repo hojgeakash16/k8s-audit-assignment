@@ -1,0 +1,26 @@
+kind: CronJob
+apiVersion: batch/v1
+metadata:
+  name: sample-app-audit
+  namespace: sample-app-ns
+spec:
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: audit-cron-container
+              image: busybox:1.36
+              resources:
+                requests:
+                  cpu: "10m"
+                  memory: "16Mi"
+                limits:
+                  cpu: "50m"
+                  memory: "32Mi"
+              command:
+                - sh
+                - -c
+                - echo "Kubernetes audit CronJob executed"

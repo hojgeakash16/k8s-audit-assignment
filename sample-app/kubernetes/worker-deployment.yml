@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-deployment
+  namespace: sample-app-ns
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: sample-app
+      component: worker
+
+  template:
+    metadata:
+      labels:
+        app: sample-app
+        component: worker
+
+    spec:
+      containers:
+        - name: worker
+          image: sample-worker:1.0
+
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
