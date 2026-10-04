@@ -80,9 +80,9 @@ kubectl get ingress -n sample-app-ns
 | Ingress | ✅ | `sample-app-ingress` routes `vote.local` to `vote` and `result.local` to `result`. Both routes returned HTTP 200 using Host headers. | Provides HTTP routing to the application Services through the nginx Ingress controller. | Ingress manifest in `sample-app/kubernetes/` |
 | Multi-node kind cluster | ✅ | Audit output: `3 node(s)`. The cluster contains `audit-control-plane`, `audit-worker`, and `audit-worker2`. | Demonstrates Kubernetes workloads running on a multi-node cluster. | `kind/kind-config.yaml` |
 | HPA (stretch) | ✅ | Audit output: `1 HPA(s)`. `vote-hpa` targets `vote-deployment` with a 50% CPU utilization target, minimum 2 and maximum 5 replicas. | Automatically adjusts vote application replicas based on CPU utilization. | `sample-app/kubernetes/vote-hpa.yml` |
-| RBAC + ServiceAccount (stretch) | ❌ | [RBAC examples](https://github.com/LondheShubham153/kubestarter/blob/main/RBAC/) <!-- TODO: add video timestamp --> |
+| RBAC + ServiceAccount (stretch) | ❌ | Audit output: `0 role/rolebinding(s), 0 custom serviceaccount(s)`. | Not implemented yet. | Not implemented |
 | CronJob (stretch) | ✅ | Audit output: `1 cronjob(s)`. `sample-app-audit` periodically creates Jobs that complete successfully. Example log: `Kubernetes audit CronJob executed`. | Demonstrates scheduled Kubernetes workloads and periodic audit execution. | `sample-app/kubernetes/audit-cronjob.yml` |
-| GitHub Actions deploying to kind (stretch) | | | | [helm/kind-action](https://github.com/helm/kind-action), [example workflow](examples/sample-app-k8s/.github/workflows/kind-deploy.yml) <!-- TODO: add video timestamp --> |
+| GitHub Actions deploying to kind (stretch) | ❌ | Audit output: no qualifying workflow was found in `.github/workflows`. | Not implemented yet. | `.github/workflows/` |
 
 ## Score
 
