@@ -86,10 +86,14 @@ kubectl get ingress -n sample-app-ns
 
 ## Score
 
-- Must-have concepts with ✅ and evidence (12 max):
-- Stretch concepts with ✅ and evidence (4 max):
-- Total (pass at 10 or more):
+- Must-have concepts with ✅ and evidence (12 max): **12/12**
+- Stretch concepts with ✅ and evidence (4 max): **2/4**
+- Total (pass at 10 or more): **14/16 — PASS**
 
 ## What was hard / what I would change
 
-A few lines, in your own words.
+The main challenge was getting the application components to communicate correctly inside the multi-node kind cluster. I worked through issues with local Docker images, Service selectors, PostgreSQL and Redis connectivity, probes, persistent storage, Ingress routing, HPA metrics, and CronJobs.
+
+I also practiced a rolling update and rollback by changing the vote Deployment from `vote:1.0` to `vote:2.0` and then rolling it back to `vote:1.0`.
+
+If I extended the project further, I would add RBAC with a dedicated ServiceAccount and a GitHub Actions workflow to automate deployment to kind.
