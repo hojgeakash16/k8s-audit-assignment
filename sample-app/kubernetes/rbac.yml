@@ -1,0 +1,33 @@
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: sample-app-auditor
+  namespace: sample-app-ns
+
+---
+
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: sample-app-pod-manager
+  namespace: sample-app-ns
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["*"]
+
+---
+
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: sample-app-pod-manager-rolebinding
+  namespace: sample-app-ns
+subjects:
+  - kind: ServiceAccount
+    name: sample-app-auditor
+    namespace: sample-app-ns
+roleRef:
+  kind: Role
+  apiGroup: rbac.authorization.k8s.io
+  name: sample-app-pod-manager
